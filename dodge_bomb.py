@@ -57,6 +57,7 @@ def init_bb_imgs() -> tuple[list[pg.Surface], list[int]]:
     bb_accs = [a for a in range(1,11)]  # 秒数に応じた爆弾の速さのリストを作成
     return bb_imgs,bb_accs
     
+
 def get_kk_imgs() -> dict[tuple[int,int],pg.Surface]:
     """
     引数:なし
@@ -76,6 +77,26 @@ def get_kk_imgs() -> dict[tuple[int,int],pg.Surface]:
         (-5,+5):pg.transform.rotozoom(kk_img,45,1),
     }
     return kk_dict
+
+
+def calc_orientation(org: pg.Rect, dst: pg.Rect, current_xy:tuple[float, float]) -> tuple[float,float]:
+    """
+    引数:org(爆弾)のrect,dst(こうかとん)のrect,current_xy(計算前の方向)
+    戻り値:爆弾の移動量
+    """
+    bbx = org.x
+    bby = org.y
+    kkx = dst.x
+    kky = dst.y
+    dif_vec_x = kkx - bbx
+    dif_vec_y = kky - bbx 
+    norm = (dif_vec_x * dif_vec_x + dif_vec_y * dif_vec_y)**0.5
+    ux = 50**0.5 * dif_vec_x / norm
+    uy = 50**0.5 * dif_vec_y / norm
+    if norm < 300:
+        return current_xy
+    return ux,uy
+
 
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
@@ -124,9 +145,10 @@ def main():
         if check_bound(kk_rct) != (True,True):
             kk_rct.move_ip(-sum_mv[0],-sum_mv[1])
         screen.blit(kk_img, kk_rct)
-        avx = vx*bb_accs[min(tmr//500,9)]
-        avy = vy*bb_accs[min(tmr//500,9)]
-        bb_rct.move_ip(avx,avy)  # 秒数に対応する爆弾の速さ
+        # avx = vx*bb_accs[min(tmr//500,9)]
+        # avy = vy*bb_accs[min(tmr//500,9)]
+        bb_rct.move_ip(calc_orientation(bb_rct,kk_rct,(vx,vy)))
+        # bb_rct.move_ip(avx,avy)  # 秒数に対応する爆弾の速さ
         yoko, tate = check_bound(bb_rct)
         if not yoko:
             vx *= -1
