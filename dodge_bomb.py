@@ -65,7 +65,6 @@ def get_kk_imgs() -> dict[tuple[int,int],pg.Surface]:
     """
     kk_img = pg.transform.rotozoom(pg.image.load("fig/3.png"), 0, 0.9)  # 3.pngをロード
     kk_dict = {
-
         (0,0): pg.transform.rotozoom(kk_img,0,1),
         (-5,0):pg.transform.rotozoom(kk_img,0,1),
         (-5,-5):pg.transform.rotozoom(kk_img,-45,1),
