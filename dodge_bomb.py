@@ -1,6 +1,7 @@
 import os
 import sys
 import random
+import time
 import pygame as pg
 
 
@@ -21,6 +22,21 @@ def check_bound(rct: pg.Rect) -> tuple[bool,bool]:
     if rct.top < 0 or HEIGHT < rct.bottom:  # たてほうこうにはみでてたら
         tate = False
     return yoko,tate
+
+
+def gameover(screen: pg.Surface) -> None:
+    go_image = pg.Surface((WIDTH,HEIGHT))  # 空のSurfaceを作成
+    pg.draw.rect(go_image,(0,0,0),(0,0,WIDTH,HEIGHT))  # 矩形を描画
+    go_image.set_alpha(200)  # alpha値を設定
+    fonto = pg.font.Font(None,80)  # フォントサイズを80に設定
+    txt = fonto.render("Game Over",True,(255,255,255))  # 黒字で"Game Over"と書かれたSurfaceインスタンスを作成
+    go_image.blit(txt,[380,285])  
+    kk_go_img = pg.image.load("fig/8.png")  # 泣いているこうかとんをロード
+    go_image.blit(kk_go_img,[320,280])
+    screen.blit(go_image,[0,0])
+    pg.display.update()
+    time.sleep(5)  # 5秒間静止させる
+    
 
 
 def main():
@@ -46,7 +62,9 @@ def main():
                 return
         screen.blit(bg_img, [0, 0]) 
         if kk_rct.colliderect(bb_rct):
+            gameover(screen)
             return
+            
         key_lst = pg.key.get_pressed()
         sum_mv = [0, 0]
         for key,mv in DELTA.items():
