@@ -25,6 +25,11 @@ def check_bound(rct: pg.Rect) -> tuple[bool,bool]:
 
 
 def gameover(screen: pg.Surface) -> None:
+    """
+    引数:screen surface
+    戻り値:なし
+    screen surfaceにgameoverの文字と泣いているこうかとんを描画させる
+    """
     go_image = pg.Surface((WIDTH,HEIGHT))  # 空のSurfaceを作成
     pg.draw.rect(go_image,(0,0,0),(0,0,WIDTH,HEIGHT))  # 矩形を描画
     go_image.set_alpha(200)  # alpha値を設定
@@ -39,15 +44,38 @@ def gameover(screen: pg.Surface) -> None:
     
 
 def init_bb_imgs() -> tuple[list[pg.Surface], list[int]]:
+    """
+    引数:なし
+    戻り値:秒数に応じた爆弾のリスト、秒数に応じた爆弾の速さのリスト
+    """
     bb_imgs = []
     for r in range(1,11):
         bb_img = pg.Surface((20*r, 20*r))
         pg.draw.circle(bb_img,(255,0,0),(10*r,10*r),10*r)
         bb_img.set_colorkey((0,0,0))
-        bb_imgs.append(bb_img)  # 秒数に応じた爆弾のに応じた大きさのリストを作成
+        bb_imgs.append(bb_img)  # 秒数に応じた爆弾の大きさのリストを作成
     bb_accs = [a for a in range(1,11)]  # 秒数に応じた爆弾の速さのリストを作成
     return bb_imgs,bb_accs
     
+def get_kk_imgs() -> dict[tuple[int,int],pg.Surface]:
+    """
+    引数:なし
+    戻り値:移動量に応じたrotozoomされた画像surfaceの辞書
+    """
+    kk_img = pg.transform.rotozoom(pg.image.load("fig/3.png"), 0, 0.9)  # 3.pngをロード
+    kk_dict = {
+
+        (0,0): pg.transform.rotozoom(kk_img,0,1),
+        (-5,0):pg.transform.rotozoom(kk_img,0,1),
+        (-5,-5):pg.transform.rotozoom(kk_img,-45,1),
+        (0,-5):pg.transform.rotozoom(pg.transform.flip(kk_img,True,False),-270,1),
+        (+5,-5):pg.transform.rotozoom(pg.transform.flip(kk_img,True,False),45,1),
+        (+5,0):pg.transform.flip(kk_img,True,False),
+        (+5,+5):pg.transform.rotozoom(pg.transform.flip(kk_img,True,False),-45,1),
+        (0,+5):pg.transform.rotozoom(pg.transform.flip(kk_img,True,False),-90,1),
+        (-5,+5):pg.transform.rotozoom(kk_img,45,1),
+    }
+    return kk_dict
 
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
@@ -66,7 +94,8 @@ def main():
     vx,vy = +5,+5  # 爆弾の速度
     clock = pg.time.Clock()
     tmr = 0
-    bb_imgs,bb_accs = init_bb_imgs()
+    bb_imgs,bb_accs = init_bb_imgs()  # 時間に応じた爆弾の大きさと速さのリストを呼び出す
+    kk_dict = get_kk_imgs()  # 移動量に応じてrotozoomされた画像のリストを呼び出す
     while True:
         for event in pg.event.get():
             if event.type == pg.QUIT: 
@@ -90,6 +119,7 @@ def main():
         #     sum_mv[0] -= 5
         # if key_lst[pg.K_RIGHT]:
         #     sum_mv[0] += 5
+        kk_img = kk_dict[tuple(sum_mv)]  # kk_imgに押下キーに対応したものを代入する
         kk_rct.move_ip(sum_mv)
         if check_bound(kk_rct) != (True,True):
             kk_rct.move_ip(-sum_mv[0],-sum_mv[1])
